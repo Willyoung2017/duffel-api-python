@@ -17,6 +17,8 @@ class OfferRequestSlice:
     origin_type: str
     origin: Union[Airport, City]
     departure_date: date
+    departure_time: Optional[dict] = None
+    arrival_time: Optional[dict] = None
 
     @classmethod
     def from_json(cls, json: dict):
@@ -42,6 +44,8 @@ class OfferRequestSlice:
             origin_type=origin_type,
             origin=origin,
             departure_date=date.fromisoformat(json["departure_date"]),
+            departure_time=json.get("departure_time"),
+            arrival_time=json.get("arrival_time"),
         )
 
 

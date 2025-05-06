@@ -83,11 +83,33 @@ class OfferRequestCreate(object):
         """Validate number of slices and the data provided for each if any were given"""
         if len(slices) == 0:
             raise OfferRequestCreate.InvalidNumberOfSlices(slices)
-        for travel_slice in slices:
-            if set(travel_slice.keys()) != set(
-                ["departure_date", "destination", "origin"]
-            ):
-                raise OfferRequestCreate.InvalidSlice(travel_slice)
+        REQUIRED = {"departure_date", "destination", "origin"}
+        OPTIONAL = {
+            "departure_time",
+            "arrival_time",
+        }
+        TIME_RE = re.compile(r"^\d{2}:\d{2}$")  # HH:MM
+
+        for sl in slices:
+            keys = set(sl)
+
+            # missing compulsory fields?
+            if not REQUIRED.issubset(keys):
+                raise OfferRequestCreate.InvalidSlice(sl)
+
+            # unknown extra keys?
+            unknown = keys - REQUIRED - OPTIONAL
+            if unknown:
+                raise OfferRequestCreate.InvalidSlice(sl)
+
+            # basic structure check for the optional time windows
+            for tw_key in ("departure_time", "arrival_time"):
+                if tw_key in sl:
+                    tw = sl[tw_key]
+                    if not isinstance(tw, dict) or set(tw) != {"from", "to"}:
+                        raise OfferRequestCreate.InvalidSlice(sl)
+                    if not TIME_RE.match(tw["from"]) or not TIME_RE.match(tw["to"]):
+                        raise OfferRequestCreate.InvalidSlice(sl)
 
     @staticmethod
     def _validate_max_connections(max_connections):

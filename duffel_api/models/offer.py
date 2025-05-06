@@ -479,6 +479,11 @@ class Offer:
     @classmethod
     def from_json(cls, json: dict):
         """Construct a class instance from a JSON response."""
+        if "allowed_passenger_identity_document_types" not in json:
+            json["allowed_passenger_identity_document_types"] = json.get(
+                "supported_passenger_identity_document_types", []
+            )
+
         return cls(
             id=json["id"],
             live_mode=json["live_mode"],
