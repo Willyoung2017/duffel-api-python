@@ -1,5 +1,6 @@
 from ...http_client import HttpClient, Pagination
 from ...models import OfferRequest
+import re
 
 
 class OfferRequestClient(HttpClient):
